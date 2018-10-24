@@ -1,5 +1,3 @@
-package com.ecc;
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,11 +20,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.File;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.TextStringBuilder;
-
-public class Exercise4 {
+public class Exercise2 {
 
 	private static class InnerCell implements Comparable<InnerCell> {
 		private String leftCell;
@@ -60,9 +54,7 @@ public class Exercise4 {
 
 		@Override
 		public int compareTo(InnerCell other) {
-			return new CompareToBuilder()
-							.append(this.toString().toLowerCase(), other.toString().toLowerCase())
-							.toComparison();
+			return this.toString().toLowerCase().compareTo(other.toString().toLowerCase());
 		}
 	}
 
@@ -73,11 +65,11 @@ public class Exercise4 {
 
 	List<List<Optional<InnerCell>>> rowCells;
 
-	public Exercise4(String tableFilePath) throws FileNotFoundException, IOException {
+	public Exercise2(String tableFilePath) throws FileNotFoundException, IOException {
 		this(new File(tableFilePath));
 	}
 
-	public Exercise4(File tableFile) throws FileNotFoundException, IOException {
+	public Exercise2(File tableFile) throws FileNotFoundException, IOException {
 		this.tableFilePath = tableFile.getAbsolutePath();
 		this.rowCells = parseTable(tableFile);
 	}
@@ -139,14 +131,14 @@ public class Exercise4 {
 					continue;
 				}
 
-				int leftCellCount = StringUtils.countMatches(innerCell.get().getLeftCell(), searchString);
+				int leftCellCount = Utility.countOccurrence(innerCell.get().getLeftCell(), searchString);
 
 				if (leftCellCount > 0) {
 					System.out.printf(
 							"@(%d,%d) Left Inner Cell, Found %d occurrences.\n", i, j, leftCellCount);
 				}
 
-				int rightCellCount = StringUtils.countMatches(innerCell.get().getRightCell(), searchString);
+				int rightCellCount = Utility.countOccurrence(innerCell.get().getRightCell(), searchString);
 
 				if (rightCellCount > 0) {
 					System.out.printf(
@@ -264,23 +256,20 @@ public class Exercise4 {
 	public void persistTable() {
 
 		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.tableFilePath))) {
-			TextStringBuilder textStringBuilder = new TextStringBuilder();
+			StringBuilder textStringBuilder = new StringBuilder();
 
 			this.rowCells.stream().forEach(
 				(columnCells) -> {
-					List<String> columnCellsStr = 
+					String columnCellsStr = 
 						columnCells.stream()
 						           .map(innerCell -> 
 						           		innerCell.isPresent() ? 
 											innerCell.get().getLeftCell() + 
 												INNER_CELL_DELIMITER + innerCell.get().getRightCell() :
 											Utility.EMPTY_STRING)
-							 	   .collect(Collectors.toList());
+							 	   .collect(Collectors.joining(OUTER_CELL_DELIMITER + Utility.EMPTY_STRING));
 
-		 			textStringBuilder.appendWithSeparators(
-		 				columnCellsStr, OUTER_CELL_DELIMITER + Utility.EMPTY_STRING);
-
-		 			textStringBuilder.append("\n");
+		 			textStringBuilder.append(columnCellsStr + "\n");
 				});
 
 			bufferedWriter.write(textStringBuilder.toString());

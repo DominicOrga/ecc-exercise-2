@@ -1,5 +1,3 @@
-package com.ecc;
-
 import java.util.Scanner;
 import java.util.Optional;
 import java.net.URL;
